@@ -1,0 +1,83 @@
+# import libraries
+import os
+import pandas as pd
+import streamlit as st
+import numpy as np
+from sklearn import datasets
+from sklearn.tree import DecisionTreeRegressor
+from sklearn import preprocessing
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.feature_extraction.text import CountVectorizer
+le = preprocessing.LabelEncoder()
+
+
+
+# Header
+st.write("""
+# Simple ML Application
+""")
+
+# clean file
+def clean_dataset(df):
+    assert isinstance(df, pd.DataFrame), "df needs to be a pd.DataFrame"
+    df.dropna(inplace=True)
+    indices_to_keep = ~df.isin([np.nan, np.inf, -np.inf]).any(1)
+    return df[indices_to_keep]
+
+# upload training file
+dfTrain = pd.DataFrame()
+cols = []
+uploaded_file = st.file_uploader("Choose a file to train the model")
+if uploaded_file is not None:
+  dfTrain = pd.read_csv(uploaded_file)
+  dfTrain = clean_dataset(dfTrain)
+  st.write(dfTrain)
+  cols = dfTrain.columns.tolist()
+
+# selecting target, features, & type of model
+y = st.selectbox(
+   'What column is the target?',
+    cols)
+x = st.multiselect(
+    'What columns would you like to use in the model?',
+    cols
+)
+#super = st.selectbox(
+#    'Is this classification or regression?',
+#    ('classification', 'regression')
+#)
+
+
+st.write(x)
+
+# Train model
+def run_model(x,y):
+    dtr = DecisionTreeRegressor(max_depth=5)
+    dtr.fit = dtr.fit(x,y)
+    return dtr.fit
+
+
+# Train model
+if st.button('Train Model'):
+    st.write('You are using',dfTrain[x], 'to predict', dfTrain[y])
+
+fitModel = run_model(dfTrain[x], dfTrain[y])
+st.write(fitModel)
+
+
+st.write(fitModel)
+# upload testing file
+dfTest = pd.DataFrame()
+uploaded_file = st.file_uploader("Choose a file to test the model")
+if uploaded_file is not None:
+  dfTest = pd.read_csv(uploaded_file)
+  dfTest = clean_dataset(dfTrain)
+  st.write(dfTest)
+  cols = dfTest.columns.tolist()
+
+
+# Make predictions
+if st.button('Test Model'):
+    predict = fitModel.predict(dfTest[x])
+    st.write(predict)
