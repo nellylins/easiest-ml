@@ -9,8 +9,12 @@ from sklearn.preprocessing import OrdinalEncoder
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_extraction.text import CountVectorizer
-ode = OrdinalEncoder(sparse = False)
+ode = OrdinalEncoder()
 
+# Random algos
+def listToString(s):
+    str1 = ", "
+    return (str1.join(s))
 
 # Header
 st.write("""
@@ -42,35 +46,43 @@ x = st.multiselect(
     'What columns would you like to use in the model?',
     cols
 )
-#super = st.selectbox(
-#    'Is this classification or regression?',
-#    ('classification', 'regression')
-#)
+modType = st.selectbox(
+    'Is this classification or regression?',
+    ('classification', 'regression')
+)
 
-
-st.write(x)
 
 # Train decision tree
 def dtr_model(x,y):
     dtr = DecisionTreeRegressor(max_depth=5)
     return dtr.fit(x,y)
 
+# Train linear model
+def lin_model(x,y):
+    lin = LinearRegression()
+    return lin.fit(x,y)
 
 # Train model
-def listToString(s):
-    str1 = ", "
-    return (str1.join(s))
-
 def train_model():
-    st.write('You are using', listToString(x), 'to predict', y, 'with ', dtr_model(dfTrain[x], dfTrain[y]), 'algorithm')
-    return dtr_model(dfTrain[x], dfTrain[y])
+    if modType == 'classification':
+        # test different models
+        # pick best accuracy
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', dtr_model(dfTrain[x], dfTrain[y]), 'algorithm')
+        return dtr_model(dfTrain[x], dfTrain[y])
+    elif modType == 'regression':
+        # test different models
+        # pick best accuracy
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', lin_model(dfTrain[x], dfTrain[y]),
+                 'algorithm')
+        return lin_model(dfTrain[x], dfTrain[y])
+
 
 # upload testing file
 dfTest = pd.DataFrame()
 uploaded_file = st.file_uploader("Choose a file to test the model")
 if uploaded_file is not None:
   dfTest = pd.read_csv(uploaded_file)
-  dfTest = clean_dataset(dfTrain)
+  dfTest = clean_dataset(dfTest)
   st.write(dfTest)
   cols = dfTest.columns.tolist()
 
@@ -79,5 +91,5 @@ if uploaded_file is not None:
 if st.button('Test Model'):
     fitModel = train_model()
     predict = fitModel.predict(dfTest[x])
-    dfTest = dfTest.assign(prediction = predict)
+    dfTest = dfTest.assign(prediction=predict)
     st.write(dfTest)
