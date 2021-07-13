@@ -7,8 +7,16 @@ from sklearn import datasets
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import OrdinalEncoder
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 ode = OrdinalEncoder()
 
 # Random algos
@@ -64,17 +72,60 @@ def lin_model(x,y):
 
 # Train model
 def train_model():
+
+    #Bring in models (classification)
+    clf_names = ["Nearest Neighbors", "Decision Tree", "Random Forest"]
+    classifiers = [
+        KNeighborsClassifier(3),
+        DecisionTreeClassifier(max_depth=5),
+        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)]
+
+    reg_names = ["Linear Regression", "Decision Tree", "Random Forest"]
+    regressors = [
+        LinearRegression(),
+        DecisionTreeRegressor(random_state=0),
+        RandomForestRegressor(n_estimators=100, max_depth=15, random_state=0)
+    ]
+
+    X = dfTrain[x]
+    Y = dfTrain[y]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+    X, Y, test_size = 0.4, random_state = 0)
+    bestScore = 0
+
+
     if modType == 'classification':
         # test different models
+        for name, clf in zip(clf_names, classifiers):
+            clf.fit(X_train, y_train)
+            score = clf.score(X_test, y_test)
+            if score > bestScore:
+                bestScore = score
+                bestClf = name
+                bestClass = clf
+
         # pick best accuracy
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', dtr_model(dfTrain[x], dfTrain[y]), 'algorithm')
-        return dtr_model(dfTrain[x], dfTrain[y])
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestClf)
+        return bestClass
+
+
     elif modType == 'regression':
         # test different models
+        for name, reg in zip(reg_names, regressors):
+            reg.fit(X_train, y_train)
+            score = reg.score(X_test, y_test)
+            st.write(score)
+            if score > bestScore:
+                bestScore = score
+                bestRg = name
+                bestReg = reg
+
         # pick best accuracy
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', lin_model(dfTrain[x], dfTrain[y]),
-                 'algorithm')
-        return lin_model(dfTrain[x], dfTrain[y])
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestRg)
+        return bestReg
+
+
 
 
 # upload testing file
@@ -93,3 +144,4 @@ if st.button('Test Model'):
     predict = fitModel.predict(dfTest[x])
     dfTest = dfTest.assign(prediction=predict)
     st.write(dfTest)
+
