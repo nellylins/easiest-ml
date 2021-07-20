@@ -62,21 +62,47 @@ x = st.multiselect(
     'What columns would you like to use in the model?',
     cols
 )
-modType = st.selectbox(
-    'Is this classification or regression?',
-    ('classification', 'regression')
+#modType = st.selectbox(
+#    'Is this classification or regression?',
+#    ('classification', 'regression')
+#)
+allModels = ["Nearest Neighbors", "Decision Tree Classifier", "Random Forest Classifier", "Linear Regression", "Decision Tree Regressor", "Random Forest Regressor"]
+allMods = [
+        KNeighborsClassifier(3),
+        DecisionTreeClassifier(max_depth=5),
+        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+        LinearRegression(),
+        DecisionTreeRegressor(random_state=0),
+        RandomForestRegressor(n_estimators=100, max_depth=15, random_state=0)
+           ]
+modType = 'classification'
+
+modChoose = st.selectbox(
+    "Would you like to select which model type to use?",
+    ("Yes", "No")
 )
+if modChoose == "Yes":
+    # Model options
+    modType = st.selectbox(
+        "Which model would you like to use?",
+        allModels
+    )
+else:
+    modType = st.selectbox(
+        'Is this classification or regression?',
+        ('classification', 'regression')
+     )
+
 
 # Train model
 def train_model():
-
-    #Bring in models (classification)
+    # Bring in models (classification)
     clf_names = ["Nearest Neighbors", "Decision Tree", "Random Forest"]
     classifiers = [
         KNeighborsClassifier(3),
         DecisionTreeClassifier(max_depth=5),
         RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)]
-
+    # Bring in models (regression)
     reg_names = ["Linear Regression", "Decision Tree", "Random Forest"]
     regressors = [
         LinearRegression(),
@@ -88,38 +114,43 @@ def train_model():
     Y = dfTrain[y]
 
     X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size = 0.4, random_state = 0)
-    bestScore = 0
+        X, Y, test_size=0.4, random_state=0)
+    if modChoose == "No":
+        bestScore = 0
+        if modType == 'classification':
+            # test different models
+            for name, clf in zip(clf_names, classifiers):
+                clf.fit(X_train, y_train)
+                score = clf.score(X_test, y_test)
+                if score > bestScore:
+                    bestScore = score
+                    bestClf = name
+                    bestClass = clf
 
+            # pick best accuracy
+            st.write('You are using', listToString(x), 'to predict', y, 'with ', bestClf, "and a training accuracy of ", bestScore, ". The model's predictions are below")
+            return bestClass
+        elif modType == 'regression':
+            # test different models
+            for name, reg in zip(reg_names, regressors):
+                reg.fit(X_train, y_train)
+                score = reg.score(X_test, y_test)
+                if score > bestScore:
+                    bestScore = score
+                    bestRg = name
+                    bestReg = reg
 
-    if modType == 'classification':
-        # test different models
-        for name, clf in zip(clf_names, classifiers):
-            clf.fit(X_train, y_train)
-            score = clf.score(X_test, y_test)
-            if score > bestScore:
-                bestScore = score
-                bestClf = name
-                bestClass = clf
-
-        # pick best accuracy
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestClf, "and a training accuracy of ", bestScore, ". The model's predictions are below")
-        return bestClass
-
-
-    elif modType == 'regression':
-        # test different models
-        for name, reg in zip(reg_names, regressors):
-            reg.fit(X_train, y_train)
-            score = reg.score(X_test, y_test)
-            if score > bestScore:
-                bestScore = score
-                bestRg = name
-                bestReg = reg
-
-        # pick best accuracy
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestRg, "and a training R squared of ", bestScore, ". The model's predictions are below")
-        return bestReg
+            # pick best accuracy
+            st.write('You are using', listToString(x), 'to predict', y, 'with ', bestRg, "and a training R squared of ", bestScore, ". The model's predictions are below")
+            return bestReg
+    else:
+        i = allModels.index(modType)
+        chosen = allMods[i]
+        chosen.fit(X_train, y_train)
+        score = chosen.score(X_test, y_test)
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', modType, "and a training accuracy/R squared of ",
+                 score, ". The model's predictions are below")
+        return chosen
 
 
 
