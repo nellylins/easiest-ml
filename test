@@ -103,7 +103,7 @@ def train_model():
                 bestClass = clf
 
         # pick best accuracy
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestClf, "and a training accuracy of ", bestScore, ". The models predictions are below")
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestClf, "and a training accuracy of ", bestScore, ". The model's predictions are below")
         return bestClass
 
 
@@ -118,7 +118,7 @@ def train_model():
                 bestReg = reg
 
         # pick best accuracy
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestRg, "and a training R squared of ", bestScore, ". The models predictions are below")
+        st.write('You are using', listToString(x), 'to predict', y, 'with ', bestRg, "and a training R squared of ", bestScore, ". The model's predictions are below")
         return bestReg
 
 
@@ -140,5 +140,3 @@ if st.button('Test Model'):
     predict = fitModel.predict(dfTest[x])
     dfTest = dfTest.assign(prediction=predict)
     st.write(dfTest)
-
-
