@@ -28,7 +28,7 @@ def listToString(s):
 
 # Header
 st.write("""
-# Easy machine learning
+# Build your model
 """)
 
 # clean file
@@ -47,7 +47,7 @@ def clean_dataset(df):
 # upload training file
 dfTrain = pd.DataFrame()
 cols = []
-uploaded_file = st.file_uploader("Choose a file to train the model with")
+uploaded_file = st.file_uploader("Choose a csv file to train the model with")
 if uploaded_file is not None:
   dfTrain = pd.read_csv(uploaded_file)
   dfTrain = clean_dataset(dfTrain)
@@ -155,19 +155,38 @@ def train_model():
 
 
 
-# upload testing file
+predictType = st.selectbox(
+    "Would you like to batch predict or use a sample?",
+    ("Choose One", "Batch", "Sample")
+)
+
+
 dfTest = pd.DataFrame()
-uploaded_file = st.file_uploader("Choose a file to predict on")
-if uploaded_file is not None:
-  dfTest = pd.read_csv(uploaded_file)
-  dfTest = clean_dataset(dfTest)
-  st.write(dfTest)
-  cols = dfTest.columns.tolist()
 
+if predictType == "Choose One":
+    st.write("Select batch or Sample")
 
-# Make predictions
-if st.button('Test Model'):
-    fitModel = train_model()
-    predict = fitModel.predict(dfTest[x])
-    dfTest = dfTest.assign(prediction=predict)
-    st.write(dfTest)
+elif predictType == "Batch":
+    # upload batch testing file
+    uploaded_file = st.file_uploader("Choose a csv file to predict on")
+    if uploaded_file is not None:
+        dfTest = pd.read_csv(uploaded_file)
+        dfTest = clean_dataset(dfTest)
+        #st.write(dfTest)
+        cols = dfTest.columns.tolist()
+    # Make predictions
+    if st.button('Test Model'):
+        fitModel = train_model()
+        predict = fitModel.predict(dfTest[x])
+        dfTest = dfTest.assign(prediction=predict)
+        st.write(dfTest)
+else:
+    index = 0
+    for i in x:
+        dfTest.loc[0, i] = st.text_input("Enter " + i)
+    #Make prediction
+    if st.button('Predict using model'):
+        fitModel = train_model()
+        predict = fitModel.predict(dfTest[x])
+        dfTest = dfTest.assign(prediction=predict)
+        st.write(dfTest)
