@@ -96,7 +96,7 @@ if uploaded_file is not None:
 # selecting target
 if modType == 'hello':
     st.write('')
-elif modType == 'clustering' or 'Agglomerative Clustering':
+elif modType == 'clustering' or modType == 'Agglomerative Clustering':
     # selecting features
     x = st.multiselect(
         'Select 2 columns to use in the model',
