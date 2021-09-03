@@ -17,6 +17,7 @@ from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.cluster import AgglomerativeClustering
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
 
@@ -31,6 +32,43 @@ def listToString(s):
 st.write("""
 # Build your model
 """)
+
+#Loading in all models
+allModels = ["Nearest Neighbors", "Decision Tree Classifier", "Random Forest Classifier", "Linear Regression", "Decision Tree Regressor", "Random Forest Regressor", "Agglomerative Clustering"]
+allMods = [
+        KNeighborsClassifier(3),
+        DecisionTreeClassifier(max_depth=5),
+        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+        LinearRegression(),
+        DecisionTreeRegressor(random_state=0),
+        RandomForestRegressor(n_estimators=100, max_depth=15, random_state=0),
+        AgglomerativeClustering(n_clusters= 3)
+           ]
+
+#Creating instance
+modType = 'hello'
+
+# selecting type of model pt 1 (selecting to select)
+modChoose = st.selectbox(
+    "Would you like to select which model type to use?",
+    ("Choose One", "Yes", "No")
+)
+
+#Selection options
+if modChoose == "Choose One":
+    st.write("")
+elif modChoose == "Yes":
+    # Model options
+    modType = st.selectbox(
+        "Which model would you like to use?",
+        allModels
+    )
+else:
+    modType = st.selectbox(
+        'What type of model would you like to build?',
+        ('classification', 'regression', 'clustering')
+     )
+
 
 # clean file
 def clean_dataset(df):
@@ -56,47 +94,23 @@ if uploaded_file is not None:
   cols = dfTrain.columns.tolist()
 
 # selecting target
-y = st.selectbox(
-   'What column is the target?',
-    cols)
-# selecting features
-x = st.multiselect(
-    'What columns would you like to use in the model?',
-    cols
-)
-
-#Loading in all models
-allModels = ["Nearest Neighbors", "Decision Tree Classifier", "Random Forest Classifier", "Linear Regression", "Decision Tree Regressor", "Random Forest Regressor"]
-allMods = [
-        KNeighborsClassifier(3),
-        DecisionTreeClassifier(max_depth=5),
-        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-        LinearRegression(),
-        DecisionTreeRegressor(random_state=0),
-        RandomForestRegressor(n_estimators=100, max_depth=15, random_state=0)
-           ]
-#Creating instance
-modType = 'classification'
-
-# selecting type of model pt 1 (selecting to select)
-modChoose = st.selectbox(
-    "Would you like to select which model type to use?",
-    ("Choose One", "Yes", "No")
-)
-#Selection options
-if modChoose == "Choose One":
-    st.write("")
-elif modChoose == "Yes":
-    # Model options
-    modType = st.selectbox(
-        "Which model would you like to use?",
-        allModels
+if modType == 'hello':
+    st.write('')
+elif modType == 'clustering' or 'Agglomerative Clustering':
+    # selecting features
+    x = st.multiselect(
+        'Select 2 columns to use in the model',
+        cols
     )
 else:
-    modType = st.selectbox(
-        'Is this classification or regression?',
-        ('classification', 'regression')
-     )
+    y = st.selectbox(
+        'What column is the target?',
+        cols)
+    # selecting features
+    x = st.multiselect(
+        'What columns would you like to use in the model?',
+        cols
+    )
 
 
 # Train model
@@ -114,10 +128,20 @@ def train_model():
         DecisionTreeRegressor(random_state=0),
         RandomForestRegressor(n_estimators=100, max_depth=15, random_state=0)
     ]
+    # Bring in models (clustering)
+    clus_names = ["Agglomerative Clustering"]
+    clus = [AgglomerativeClustering(n_clusters=3)]
 
     # Creating dataframes for x & y values
-    X = dfTrain[x]
-    Y = dfTrain[y]
+    X = dfTrain
+    Y = dfTrain
+
+    if modType == "clustering" or "Agglomerative Clustering":
+        X = dfTrain[x]
+    else:
+        X = dfTrain[x]
+        Y = dfTrain[y]
+
     # Splitting training & testing
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=0.4, random_state=0)
@@ -152,32 +176,45 @@ def train_model():
             # print best accuracy
             st.write('You are using', listToString(x), 'to predict', y, 'with ', bestRg, "and a training R squared of ", bestScore, ". The model's predictions are below")
             return bestReg
+        else:
+            st.write('You are using', listToString(x), 'to build out clusters')
+            model = AgglomerativeClustering(n_clusters=3)
+            return model.fit(X)
     ######## If user does want to select their own model
     else:
         i = allModels.index(modType)
         chosen = allMods[i]
-        chosen.fit(X_train, y_train)
-        score = chosen.score(X_test, y_test)
-        st.write('You are using', listToString(x), 'to predict', y, 'with ', modType, "and a training accuracy/R squared of ",
-                 score, ". The model's predictions are below")
-        return chosen
+        if modType == "Agglomerative Clustering":
+            st.write('You are using', listToString(x), 'to build out clusters, shown below in column "cluster"')
+            model = AgglomerativeClustering(n_clusters=3)
+            return model.fit(X)
+        else:
+            chosen.fit(X_train, y_train)
+            score = chosen.score(X_test, y_test)
+            st.write('You are using', listToString(x), 'to predict', y, 'with ', modType, "and a training accuracy/R squared of ",
+                    score, ". The model's predictions are below")
+            return chosen
 
 
 ########Model testing setup
 
 
 #What type of output
-predictType = st.selectbox(
-    "Would you like to batch predict or use a sample?",
-    ("Choose One", "Batch", "Sample")
-)
+predictType = 'Choose One'
+if cols == []:
+    st.write('')
+else:
+    predictType = st.selectbox(
+        "Would you like to batch predict or use a sample?",
+        ("Choose One", "Batch", "Sample")
+    )
 
 
 dfTest = pd.DataFrame()
 
 # Choose model button
 if predictType == "Choose One":
-    st.write("Select batch or Sample")
+    st.write("")
 #Batch predict
 elif predictType == "Batch":
     # upload batch testing file
@@ -189,10 +226,16 @@ elif predictType == "Batch":
         cols = dfTest.columns.tolist()
     # Make predictions
     if st.button('Test Model'):
-        fitModel = train_model()
-        predict = fitModel.predict(dfTest[x])
-        dfTest = dfTest.assign(prediction=predict)
-        st.write(dfTest)
+        if modType != "clustering" and modType != "Agglomerative Clustering":
+            fitModel = train_model()
+            predict = fitModel.predict(dfTest[x])
+            dfTest = dfTest.assign(prediction=predict)
+            st.write(dfTest)
+        else:
+            fitModel = train_model()
+            predict = fitModel.fit_predict(dfTest[x])
+            dfTest = dfTest.assign(cluster=predict)
+            st.write(dfTest)
 # Sample predict
 else:
     index = 0
@@ -200,8 +243,14 @@ else:
     for i in x:
         dfTest.loc[0, i] = st.text_input("Enter " + i)
     #Make prediction
-    if st.button('Predict using model'):
-        fitModel = train_model()
-        predict = fitModel.predict(dfTest[x])
-        dfTest = dfTest.assign(prediction=predict)
-        st.write(dfTest)
+    if st.button('Test Model'):
+        if modType != "clustering" or "Agglomerative Clustering":
+            fitModel = train_model()
+            predict = fitModel.predict(dfTest[x])
+            dfTest = dfTest.assign(prediction=predict)
+            st.write(dfTest)
+        else:
+            fitModel = train_model()
+            predict = fitModel.fit_predict(dfTest[x])
+            dfTest = dfTest.assign(cluster=predict)
+            st.write(dfTest)
