@@ -65,7 +65,7 @@ elif modChoose == "Yes":
     )
 else:
     modType = st.selectbox(
-        'What type of model would you like to build? Classification models can be used to predict things such as Win or Lose, color, or other categorical values. Regression is used when estimating numerical values such as price. Clustering can be used to discover patterns or groups in your data.',
+        'What type of model would you like to build?',
         ('classification', 'regression', 'clustering')
      )
 
@@ -99,7 +99,7 @@ if modType == 'hello':
 elif modType == 'clustering' or modType == 'Agglomerative Clustering':
     # selecting features
     x = st.multiselect(
-        'Select 2 columns to use in the model, the data will be grouped using these inputs',
+        'Select 2 columns to use in the model.',
         cols
     )
 else:
@@ -108,7 +108,7 @@ else:
         cols)
     # selecting features
     x = st.multiselect(
-        'What columns would you like to use in the model? Select the columns you believe would best predict your outcome.',
+        'What columns would you like to use in the model?',
         cols
     )
 
