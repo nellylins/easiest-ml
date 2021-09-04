@@ -104,7 +104,7 @@ elif modType == 'clustering' or modType == 'Agglomerative Clustering':
     )
 else:
     y = st.selectbox(
-        'What column is the target? This is what you'll be predicting',
+        'What column is the target?',
         cols)
     # selecting features
     x = st.multiselect(
