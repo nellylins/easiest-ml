@@ -50,7 +50,7 @@ modType = 'hello'
 
 # selecting type of model pt 1 (selecting to select)
 modChoose = st.selectbox(
-    "Would you like to select which model type to use?",
+    "Would you like to select which model type to use? If you select yes, you can choose an algorithm from the 7 currently available in the application. Otherwise, you can just select what outcome you're predicting",
     ("Choose One", "Yes", "No")
 )
 
@@ -60,12 +60,12 @@ if modChoose == "Choose One":
 elif modChoose == "Yes":
     # Model options
     modType = st.selectbox(
-        "Which model would you like to use?",
+        "Please specify which model you'd like to use from the 7 we currently have available.",
         allModels
     )
 else:
     modType = st.selectbox(
-        'What type of model would you like to build?',
+        'What type of model would you like to build? Classification models can be used to predict things such as Win or Lose, color, or other categorical values. Regression is used when estimating numerical values such as price. Clustering can be used to discover patterns or groups in your data.',
         ('classification', 'regression', 'clustering')
      )
 
@@ -86,7 +86,7 @@ def clean_dataset(df):
 # upload training file
 dfTrain = pd.DataFrame()
 cols = []
-uploaded_file = st.file_uploader("Choose a csv file to train the model with")
+uploaded_file = st.file_uploader("Choose a csv file to train the model with. Currently, csv is the only file type supported on the platform.")
 if uploaded_file is not None:
   dfTrain = pd.read_csv(uploaded_file)
   dfTrain = clean_dataset(dfTrain)
@@ -99,7 +99,7 @@ if modType == 'hello':
 elif modType == 'clustering' or modType == 'Agglomerative Clustering':
     # selecting features
     x = st.multiselect(
-        'Select 2 columns to use in the model',
+        'Select 2 columns to use in the model, the data will be grouped using these inputs',
         cols
     )
 else:
@@ -108,7 +108,7 @@ else:
         cols)
     # selecting features
     x = st.multiselect(
-        'What columns would you like to use in the model?',
+        'What columns would you like to use in the model? Select the columns you believe would best predict your outcome.',
         cols
     )
 
