@@ -50,7 +50,7 @@ modType = 'hello'
 
 # selecting type of model pt 1 (selecting to select)
 modChoose = st.selectbox(
-    "Would you like to select which model type to use? If you select yes, you can choose an algorithm from the 7 currently available in the application. Otherwise, you can just select what outcome you're predicting",
+    "Would you like to select which model type to use? If you select yes, you can choose an algorithm from the 7 currently available in the application. Otherwise, you can just select a general approach.",
     ("Choose One", "Yes", "No")
 )
 
@@ -60,7 +60,7 @@ if modChoose == "Choose One":
 elif modChoose == "Yes":
     # Model options
     modType = st.selectbox(
-        "Please specify which model you'd like to use from the 7 we currently have available.",
+        "Please specify which algorithm you'd like to use from the 7 we currently have available.",
         allModels
     )
 else:
