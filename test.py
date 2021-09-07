@@ -93,6 +93,9 @@ if uploaded_file is not None:
   st.write(dfTrain)
   cols = dfTrain.columns.tolist()
 
+x = cols
+y = cols
+
 # selecting target
 if modType == 'hello':
     st.write('')
@@ -133,10 +136,10 @@ def train_model():
     clus = [AgglomerativeClustering(n_clusters=3)]
 
     # Creating dataframes for x & y values
-    X = dfTrain
-    Y = dfTrain
+    X = pd.DataFrame()
+    Y = pd.DataFrame()
 
-    if modType == "clustering" or "Agglomerative Clustering":
+    if modType == "clustering" or modType == "Agglomerative Clustering":
         X = dfTrain[x]
     else:
         X = dfTrain[x]
@@ -229,11 +232,13 @@ elif predictType == "Batch":
         if modType != "clustering" and modType != "Agglomerative Clustering":
             fitModel = train_model()
             predict = fitModel.predict(dfTest[x])
+            #st.write(predict)
             dfTest = dfTest.assign(prediction=predict)
             st.write(dfTest)
         else:
             fitModel = train_model()
             predict = fitModel.fit_predict(dfTest[x])
+            #st.write(predict)
             dfTest = dfTest.assign(cluster=predict)
             st.write(dfTest)
 # Sample predict
@@ -244,13 +249,15 @@ else:
         dfTest.loc[0, i] = st.text_input("Enter " + i)
     #Make prediction
     if st.button('Test Model'):
-        if modType != "clustering" or "Agglomerative Clustering":
+        if modType != "clustering" and modType != "Agglomerative Clustering":
             fitModel = train_model()
             predict = fitModel.predict(dfTest[x])
+            #st.write(predict)
             dfTest = dfTest.assign(prediction=predict)
             st.write(dfTest)
         else:
             fitModel = train_model()
             predict = fitModel.fit_predict(dfTest[x])
+            #st.write(predict)
             dfTest = dfTest.assign(cluster=predict)
             st.write(dfTest)
